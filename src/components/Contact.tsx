@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Linkedin, MapPin, Send } from "lucide-react";
+import { Mail, Linkedin, MapPin, Send, CheckCircle } from "lucide-react";
 import { contactInfo } from "@/lib/data";
 import { useState, FormEvent } from "react";
 
@@ -12,11 +12,38 @@ export default function Contact() {
     subject: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // In production, this would send the form data
-    alert("Thanks for reaching out! This is a demo form.");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("https://formspree.io/f/xpwzgvzz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        alert("Something went wrong. Please try again or email me directly.");
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again or email me directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,76 +130,111 @@ export default function Contact() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <form onSubmit={handleSubmit} className="glass-card p-8">
-              <div className="space-y-6">
-                {/* Name & Email row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm text-slate-400 mb-2">Name</label>
-                    <input
-                      type="text"
-                      required
-                      className="input-field"
-                      placeholder="Your name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-slate-400 mb-2">Email</label>
-                    <input
-                      type="email"
-                      required
-                      className="input-field"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                {/* Subject */}
-                <div>
-                  <label className="block text-sm text-slate-400 mb-2">Subject</label>
-                  <select
-                    required
-                    className="input-field appearance-none cursor-pointer"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  >
-                    <option value="" disabled>Select a topic</option>
-                    <option value="support">Technical Support</option>
-                    <option value="consulting">Consulting</option>
-                    <option value="collaboration">Collaboration</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                {/* Message */}
-                <div>
-                  <label className="block text-sm text-slate-400 mb-2">Message</label>
-                  <textarea
-                    required
-                    rows={5}
-                    className="input-field resize-none"
-                    placeholder="Tell me about your project or question..."
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  />
-                </div>
-
-                {/* Submit */}
-                <motion.button
-                  type="submit"
-                  className="w-full btn-primary flex items-center justify-center gap-2"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+            {isSubmitted ? (
+              <div className="glass-card p-12 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", duration: 0.5 }}
                 >
-                  <Send className="w-4 h-4" />
-                  Send Message
-                </motion.button>
+                  <CheckCircle className="w-20 h-20 text-cyan mx-auto mb-6" />
+                </motion.div>
+                <h3 className="text-2xl font-semibold mb-4" style={{ fontFamily: "var(--font-outfit)" }}>
+                  Message Sent!
+                </h3>
+                <p className="text-slate-300 mb-6">
+                  Thanks for reaching out. I&apos;ll get back to you as soon as possible.
+                </p>
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="text-cyan hover:underline"
+                >
+                  Send another message
+                </button>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="glass-card p-8">
+                <div className="space-y-6">
+                  {/* Name & Email row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-2">Name</label>
+                      <input
+                        type="text"
+                        required
+                        className="input-field"
+                        placeholder="Your name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-2">Email</label>
+                      <input
+                        type="email"
+                        required
+                        className="input-field"
+                        placeholder="your@email.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Subject */}
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">Subject</label>
+                    <select
+                      required
+                      className="input-field appearance-none cursor-pointer"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    >
+                      <option value="" disabled>Select a topic</option>
+                      <option value="support">Technical Support</option>
+                      <option value="consulting">Consulting</option>
+                      <option value="collaboration">Collaboration</option>
+                      <option value="job">Job Opportunity</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-sm text-slate-400 mb-2">Message</label>
+                    <textarea
+                      required
+                      rows={5}
+                      className="input-field resize-none"
+                      placeholder="Tell me about your project or question..."
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Submit */}
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Send Message
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </form>
+            )}
           </motion.div>
         </div>
 
