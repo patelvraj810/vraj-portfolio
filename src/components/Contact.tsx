@@ -7,6 +7,34 @@ import { useState } from "react";
 
 export default function Contact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    try {
+      const response = await fetch("https://formspree.io/f/xpqypjkp", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      
+      if (response.ok) {
+        setIsSubmitted(true);
+        form.reset();
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section id="contact" className="py-24 px-4 md:px-8 lg:px-12">
@@ -116,10 +144,8 @@ export default function Contact() {
               </div>
             ) : (
               <form 
-                action="https://formspree.io/f/xpqypjkp" 
-                method="POST" 
+                onSubmit={handleSubmit}
                 className="glass-card p-8"
-                onSubmit={() => setTimeout(() => setIsSubmitted(true), 500)}
               >
                 <div className="space-y-6">
                   {/* Name & Email row */}
@@ -178,12 +204,17 @@ export default function Contact() {
                   {/* Submit */}
                   <motion.button
                     type="submit"
-                    className="w-full btn-primary flex items-center justify-center gap-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    disabled={isLoading}
+                    className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={!isLoading ? { scale: 1.02 } : {}}
+                    whileTap={!isLoading ? { scale: 0.98 } : {}}
                   >
-                    <Send className="w-4 h-4" />
-                    Send Message
+                    {isLoading ? (
+                      <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    {isLoading ? "Sending..." : "Send Message"}
                   </motion.button>
                 </div>
               </form>
