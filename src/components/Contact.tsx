@@ -3,48 +3,10 @@
 import { motion } from "framer-motion";
 import { Mail, Linkedin, MapPin, Send, CheckCircle } from "lucide-react";
 import { contactInfo } from "@/lib/data";
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("https://formspree.io/f/xpqypjkp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-        }),
-      });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-        setFormData({ name: "", email: "", subject: "", message: "" });
-      } else {
-        alert("Something went wrong. Please try again or email me directly.");
-      }
-    } catch (error) {
-      alert("Something went wrong. Please try again or email me directly.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <section id="contact" className="py-24 px-4 md:px-8 lg:px-12">
@@ -153,7 +115,12 @@ export default function Contact() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="glass-card p-8">
+              <form 
+                action="https://formspree.io/f/xpqypjkp" 
+                method="POST" 
+                className="glass-card p-8"
+                onSubmit={() => setTimeout(() => setIsSubmitted(true), 500)}
+              >
                 <div className="space-y-6">
                   {/* Name & Email row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -161,22 +128,20 @@ export default function Contact() {
                       <label className="block text-sm text-slate-400 mb-2">Name</label>
                       <input
                         type="text"
+                        name="name"
                         required
                         className="input-field"
                         placeholder="Your name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
                     </div>
                     <div>
                       <label className="block text-sm text-slate-400 mb-2">Email</label>
                       <input
                         type="email"
+                        name="email"
                         required
                         className="input-field"
                         placeholder="your@email.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
                     </div>
                   </div>
@@ -185,17 +150,16 @@ export default function Contact() {
                   <div>
                     <label className="block text-sm text-slate-400 mb-2">Subject</label>
                     <select
+                      name="subject"
                       required
                       className="input-field appearance-none cursor-pointer"
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     >
                       <option value="" disabled>Select a topic</option>
-                      <option value="support">Technical Support</option>
-                      <option value="consulting">Consulting</option>
-                      <option value="collaboration">Collaboration</option>
-                      <option value="job">Job Opportunity</option>
-                      <option value="other">Other</option>
+                      <option value="Technical Support">Technical Support</option>
+                      <option value="Consulting">Consulting</option>
+                      <option value="Collaboration">Collaboration</option>
+                      <option value="Job Opportunity">Job Opportunity</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
 
@@ -203,34 +167,23 @@ export default function Contact() {
                   <div>
                     <label className="block text-sm text-slate-400 mb-2">Message</label>
                     <textarea
+                      name="message"
                       required
                       rows={5}
                       className="input-field resize-none"
                       placeholder="Tell me about your project or question..."
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     />
                   </div>
 
                   {/* Submit */}
                   <motion.button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
-                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                    className="w-full btn-primary flex items-center justify-center gap-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Send Message
-                      </>
-                    )}
+                    <Send className="w-4 h-4" />
+                    Send Message
                   </motion.button>
                 </div>
               </form>
