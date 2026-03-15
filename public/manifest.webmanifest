@@ -1,0 +1,17 @@
+{
+  "name": "Vraj Patel - Tech Support Specialist",
+  "short_name": "Vraj Patel",
+  "description": "Tech Support Specialist with 6+ years of experience in IT support, Microsoft 365, Azure AD, and AI-driven automation.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
